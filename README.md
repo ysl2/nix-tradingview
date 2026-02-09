@@ -6,10 +6,10 @@ This project provides a complete set of scripts for installing and configuring T
 
 - ✅ Install TradingView via Nix (user-level)
 - ✅ Configure HTTP/HTTPS proxy support
-- ✅ Configure deep links (tradingview:// protocol)
 - ✅ Configure systemd service for auto-start
 - ✅ Fix fcitx5 environment variables
 - ⏸️ XWayland support planned for future (xwayland-satellite)
+- ⚠️ Desktop integration (launcher) not supported - use systemctl instead
 
 ## Project Structure
 
@@ -18,22 +18,17 @@ This project provides a complete set of scripts for installing and configuring T
 ├── README.md              # This file
 ├── QUICKSTART.md          # Quick start guide
 ├── setup.sh               # One-click install script (recommended)
+├── uninstall.sh           # One-click uninstall script
 ├── Makefile               # make command support
-├── manual/                # Manual step-by-step installation
-│   ├── README.md          # Manual installation guide
-│   ├── step1-install.sh   # Step 1: Install TradingView
-│   ├── step2-proxy.sh     # Step 2: Configure proxy
-│   ├── step3-deep-link.sh # Step 3: Configure deep links
-│   ├── step4-service.sh   # Step 4: Configure service
-│   └── step5-bashrc.sh    # Step 5: Update bashrc
 ├── config/                # Configuration file templates
 │   ├── README.md
 │   ├── tradingview.service
-│   ├── tradingview-wayland
 │   └── nixos-fcitx5.patch
 └── scripts/               # Utility scripts
     └── verify-install.sh  # Verify installation
 ```
+
+**Note**: Desktop file integration (launcher) is not supported due to Electron + Wayland limitations. Use `systemctl --user start tradingview.service` instead.
 
 ## Quick Start
 
@@ -51,9 +46,18 @@ cd ~/Documents/nix-tradingview
 make install
 ```
 
-### Method 3: Manual Step-by-Step Installation
+### Method 3: Manual Installation
 
-See `manual/README.md` for detailed steps.
+```bash
+# Install TradingView
+nix profile install nixpkgs#tradingview --impure
+
+# Create and start service (see config/tradingview.service for template)
+mkdir -p ~/.config/systemd/user
+cp config/tradingview.service ~/.config/systemd/user/
+systemctl --user daemon-reload
+systemctl --user start tradingview.service
+```
 
 ## Requirements
 
@@ -69,27 +73,33 @@ The scripts configure the following proxy environment variables:
 - `http_proxy=http://127.0.0.1:20171`
 - `https_proxy=http://127.0.0.1:20171`
 
-To change the proxy port, edit the `PROXY_PORT` variable in the scripts.
+To change the proxy port, edit the `PROXY_PORT` variable in `setup.sh`.
 
 ### System Configuration
 
-The scripts create the following files:
+The scripts create the following file:
 
 1. **systemd service**: `~/.config/systemd/user/tradingview.service`
-2. **Wrapper script**: `~/.local/bin/tradingview-wayland`
-3. **Desktop file**: `~/.local/share/applications/tradingview.desktop`
+
+This service includes all necessary environment variables (proxy, Wayland, fcitx5) and manages the TradingView process.
 
 ## Usage
 
 ### Starting TradingView
 
-```bash
-# Start via systemd (recommended)
-systemctl --user start tradingview.service
+#### Method 1: Using systemd Service (Recommended)
 
-# Or run directly
+```bash
+systemctl --user start tradingview.service
+```
+
+#### Method 2: Direct Command
+
+```bash
 tradingview
 ```
+
+**Note**: For full environment variables (proxy, Wayland, fcitx5), use the systemd service method above.
 
 ### Service Management
 
@@ -126,12 +136,32 @@ make verify
 
 ## Uninstall
 
+### Method 1: One-Click Uninstall (Recommended)
+
+```bash
+cd ~/Documents/nix-tradingview
+./uninstall.sh
+```
+
+### Method 2: Using Makefile
+
 ```bash
 cd ~/Documents/nix-tradingview
 make uninstall
 ```
 
-Or manually:
+### What Gets Removed
+
+The uninstall script will:
+- ✅ Stop and disable TradingView service
+- ✅ Remove TradingView from Nix profile
+- ✅ Remove configuration files
+- ✅ Offer to remove .bashrc configuration (optional)
+- ❌ **Preserve** user data in `~/.config/TradingView/`
+
+### Manual Uninstall
+
+If you prefer to uninstall manually:
 
 ```bash
 # Stop and disable service
@@ -143,8 +173,9 @@ nix profile remove nixpkgs#tradingview
 
 # Remove configuration files
 rm -f ~/.config/systemd/user/tradingview.service
-rm -f ~/.local/bin/tradingview-wayland
-rm -f ~/.local/share/applications/tradingview.desktop
+
+# Remove user data (optional)
+rm -rf ~/.config/TradingView
 ```
 
 ## Known Limitations
@@ -175,15 +206,6 @@ rm -f ~/.local/share/applications/tradingview.desktop
    journalctl --user -u tradingview.service -f
    ```
 
-### Deep Links Not Working
-
-1. Check protocol handler:
-   ```bash
-   xdg-settings get default-url-scheme-handler tradingview
-   ```
-
-2. Should output: `tradingview.desktop`
-
 ### Proxy Not Working
 
 Check process environment variables:
@@ -202,6 +224,12 @@ If you find issues or have suggestions for improvement, feel free to submit an i
 MIT License
 
 ## Changelog
+
+### v1.1.0 (2026-02-09)
+- Simplified installation process (2 steps instead of 5)
+- Removed desktop file and wrapper script (use systemctl only)
+- Updated documentation to reflect systemctl-only approach
+- Removed manual installation directory
 
 ### v1.0.0 (2026-02-09)
 - Initial release

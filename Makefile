@@ -1,4 +1,4 @@
-.PHONY: all install uninstall verify clean help manual
+.PHONY: all install uninstall verify clean help
 
 # Default target
 all: install
@@ -12,7 +12,6 @@ help:
 	@echo "  make uninstall    - Uninstall TradingView"
 	@echo "  make verify       - Verify installation"
 	@echo "  make clean        - Clean temporary files"
-	@echo "  make manual       - Show manual installation guide"
 	@echo "  make help         - Show this help message"
 
 # One-click install
@@ -24,17 +23,8 @@ install:
 # Uninstall
 uninstall:
 	@echo "Starting TradingView uninstallation..."
-	@echo "Stopping service..."
-	@-systemctl --user stop tradingview.service 2>/dev/null || true
-	@-systemctl --user disable tradingview.service 2>/dev/null || true
-	@echo "Removing from Nix profile..."
-	@-nix profile remove nixpkgs#tradingview 2>/dev/null || echo "TradingView not in profile"
-	@echo "Removing configuration files..."
-	@-rm -f ~/.config/systemd/user/tradingview.service
-	@-rm -f ~/.local/bin/tradingview-wayland
-	@-rm -f ~/.local/share/applications/tradingview.desktop
-	@-rm -f ~/.local/share/icons/tradingview.png
-	@echo "Uninstallation completed"
+	@chmod +x uninstall.sh
+	@./uninstall.sh
 
 # Verify installation
 verify:
@@ -47,12 +37,3 @@ clean:
 	@echo "Cleaning temporary files..."
 	@find . -name "*.bak" -type f -delete
 	@echo "Clean completed"
-
-# Manual installation guide
-manual:
-	@echo ""
-	@echo "=========================================="
-	@echo "  Manual Step-by-Step Installation"
-	@echo "=========================================="
-	@echo ""
-	@cat manual/README.md

@@ -22,17 +22,24 @@ make verify
 make uninstall
 ```
 
+## One-Click Uninstall
+
+```bash
+cd ~/Documents/nix-tradingview
+./uninstall.sh
+```
+
 ## Manual Installation
 
 ```bash
-cd ~/Documents/nix-tradingview/manual
+# Install TradingView
+nix profile install nixpkgs#tradingview --impure
 
-# Execute each script step by step
-./step1-install.sh
-./step2-proxy.sh
-./step3-deep-link.sh
-./step4-service.sh
-./step5-bashrc.sh
+# Create and start service
+mkdir -p ~/.config/systemd/user
+cp config/tradingview.service ~/.config/systemd/user/
+systemctl --user daemon-reload
+systemctl --user start tradingview.service
 ```
 
 ## Verify Installation
@@ -52,9 +59,7 @@ cd ~/Documents/nix-tradingview/manual
 If your proxy is not on port 20171, edit:
 
 1. `setup.sh` - modify `PROXY_PORT` variable
-2. `manual/step2-proxy.sh` - modify `PROXY_PORT` variable
-3. `config/tradingview.service` - modify proxy addresses
-4. `config/tradingview-wayland` - modify proxy environment variables
+2. `config/tradingview.service` - modify proxy addresses
 
 ## Troubleshooting
 
@@ -68,15 +73,6 @@ systemctl --user status tradingview.service
 journalctl --user -u tradingview.service -f
 ```
 
-### Deep Links Not Working
-
-```bash
-# Check configuration
-xdg-settings get default-url-scheme-handler tradingview
-
-# Should output: tradingview.desktop
-```
-
 ### Verify Environment Variables
 
 ```bash
@@ -88,14 +84,14 @@ cat /proc/$(pgrep tradingview)/environ | tr '\0' '\n' | grep -E "(proxy|fcitx|WA
 
 After installation, you should be able to:
 
-1. ✓ Launch TradingView
+1. ✓ Launch TradingView via systemctl
 2. ✓ Use proxy for network access
-3. ✓ Log in via deep links
-4. ✓ Service auto-restart
+3. ✓ Service auto-restart on failure
 
 ## Known Limitations
 
 - ⚠️ Input method support limited (Electron + Wayland limitation)
+- ⚠️ Desktop launcher not supported - use systemctl instead
 - 💡 Recommend using browser version for full fcitx5 support
 
 ## Need Help?

@@ -46,22 +46,7 @@ else
 fi
 echo ""
 
-# 2. Check wrapper script
-echo "Checking wrapper script..."
-WRAPPER="$HOME/.local/bin/tradingview-wayland"
-if [ -f "$WRAPPER" ]; then
-    test_pass "Wrapper script exists"
-    if [ -x "$WRAPPER" ]; then
-        test_pass "Wrapper script executable"
-    else
-        test_fail "Wrapper script not executable"
-    fi
-else
-    test_fail "Wrapper script does not exist"
-fi
-echo ""
-
-# 3. Check systemd service
+# 2. Check systemd service
 echo "Checking systemd service..."
 SERVICE="$HOME/.config/systemd/user/tradingview.service"
 if [ -f "$SERVICE" ]; then
@@ -78,24 +63,7 @@ else
 fi
 echo ""
 
-# 4. Check deep link configuration
-echo "Checking deep link configuration..."
-HANDLER=$(xdg-settings get default-url-scheme-handler tradingview 2>/dev/null)
-if [ "$HANDLER" = "tradingview.desktop" ]; then
-    test_pass "Deep link configured"
-else
-    test_fail "Deep link not configured"
-    test_info "Current: $HANDLER"
-fi
-
-if [ -f "$HOME/.local/share/applications/tradingview.desktop" ]; then
-    test_pass "Desktop file exists"
-else
-    test_fail "Desktop file does not exist"
-fi
-echo ""
-
-# 5. Check environment variables (from running process)
+# 3. Check environment variables (from running process)
 echo "Checking process environment variables..."
 PID=$(pgrep -f tradingview | head -1)
 if [ -n "$PID" ]; then
@@ -131,7 +99,7 @@ else
 fi
 echo ""
 
-# 6. Check .bashrc
+# 4. Check .bashrc
 echo "Checking .bashrc configuration..."
 if grep -q "TradingView fcitx5 fix" "$HOME/.bashrc" 2>/dev/null; then
     test_pass ".bashrc contains fcitx5 configuration"
@@ -157,7 +125,6 @@ else
     echo ""
     echo "Common issues:"
     echo "  1. Service not running: systemctl --user start tradingview.service"
-    echo "  2. Deep link not configured: cd manual && ./step3-deep-link.sh"
-    echo "  3. Proxy not configured: Check if proxy service is running on port 20171"
+    echo "  2. Proxy not configured: Check if proxy service is running on port 20171"
     exit 1
 fi

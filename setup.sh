@@ -93,12 +93,14 @@ create_systemd_service() {
 [Unit]
 Description=TradingView
 After=niri.service
-Requires=niri.service
+Wants=niri.service
 
 [Service]
 Type=simple
 ExecStart=/home/songliyu/.nix-profile/bin/tradingview
-Restart=on-failure
+Restart=no
+TimeoutStopSec=5
+KillMode=process
 Environment=WAYLAND_DISPLAY=wayland-1
 Environment=ELECTRON_OZONE_PLATFORM_HINT=wayland
 Environment=http_proxy=http://${PROXY_HOST}:${PROXY_PORT}

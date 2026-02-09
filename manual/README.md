@@ -1,135 +1,135 @@
-# 手动分步安装 TradingView
+# Manual Step-by-Step Installation
 
-这个目录包含手动分步安装的脚本，让你可以逐步控制安装过程。
+This directory contains scripts for manual step-by-step installation, giving you control over each step.
 
-## 步骤概览
+## Step Overview
 
-1. **step1-install.sh** - 安装 TradingView（通过 Nix）
-2. **step2-proxy.sh** - 配置代理设置
-3. **step3-deep-link.sh** - 配置深度链接
-4. **step4-service.sh** - 配置 systemd 服务
-5. **step5-bashrc.sh** - 更新 .bashrc
+1. **step1-install.sh** - Install TradingView (via Nix)
+2. **step2-proxy.sh** - Configure proxy settings
+3. **step3-deep-link.sh** - Configure deep links
+4. **step4-service.sh** - Configure systemd service
+5. **step5-bashrc.sh** - Update .bashrc
 
-## 使用方法
+## Usage
 
-### 逐步执行
+### Execute Step by Step
 
 ```bash
 cd ~/Documents/nix-tradingview/manual
 
-# 步骤 1: 安装 TradingView
+# Step 1: Install TradingView
 chmod +x step1-install.sh
 ./step1-install.sh
 
-# 步骤 2: 配置代理
+# Step 2: Configure proxy
 chmod +x step2-proxy.sh
 ./step2-proxy.sh
 
-# 步骤 3: 配置深度链接
+# Step 3: Configure deep links
 chmod +x step3-deep-link.sh
 ./step3-deep-link.sh
 
-# 步骤 4: 配置服务
+# Step 4: Configure service
 chmod +x step4-service.sh
 ./step4-service.sh
 
-# 步骤 5: 更新 bashrc
+# Step 5: Update bashrc
 chmod +x step5-bashrc.sh
 ./step5-bashrc.sh
 ```
 
-### 跳过某些步骤
+### Skip Certain Steps
 
-如果某些步骤已经完成，可以跳过：
+If some steps are already completed, you can skip them:
 
 ```bash
-# 只执行步骤 4 和 5
+# Only execute steps 4 and 5
 ./step4-service.sh
 ./step5-bashrc.sh
 ```
 
-### 回滚步骤
+### Re-run Steps
 
-每个脚本执行前会检查是否已经完成，所以可以安全地重复执行。
+Each script checks if the step is already completed before executing, so it's safe to re-run scripts.
 
-## 详细说明
+## Detailed Steps
 
-### 步骤 1: 安装 TradingView
+### Step 1: Install TradingView
 
-此脚本会：
-- 设置 NIXPKGS_ALLOW_UNFREE 环境变量
-- 通过 `nix profile install` 安装 TradingView
-- 需要 Nix 包管理器
+This script will:
+- Set NIXPKGS_ALLOW_UNFREE environment variable
+- Install TradingView via `nix profile install`
+- Requires Nix package manager
 
-**执行时间**: 约 1-2 分钟（取决于网络速度）
+**Execution time**: About 1-2 minutes (depends on network speed)
 
-### 步骤 2: 配置代理
+### Step 2: Configure Proxy
 
-此脚本会：
-- 创建 Wayland 包装脚本 `~/.local/bin/tradingview-wayland`
-- 配置代理环境变量（默认：127.0.0.1:20171）
+This script will:
+- Create Wayland wrapper script at `~/.local/bin/tradingview-wayland`
+- Configure proxy environment variables (default: 127.0.0.1:20171)
 
-**注意**: 如果你的代理端口不是 20171，需要编辑脚本。
+**Note**: If your proxy port is not 20171, you need to edit the script.
 
-### 步骤 3: 配置深度链接
+### Step 3: Configure Deep Links
 
-此脚本会：
-- 复制桌面文件到 `~/.local/share/applications/`
-- 更新桌面文件以使用包装脚本
-- 设置 tradingview:// 协议处理器
+This script will:
+- Copy desktop file to `~/.local/share/applications/`
+- Update desktop file to use wrapper script
+- Set tradingview:// protocol handler
 
-**效果**: 点击浏览器中的 "Grant Access" 按钮后，会自动打开 TradingView 应用。
+**Effect**: When you click the "Grant Access" button in the browser, TradingView app will open automatically.
 
-### 步骤 4: 配置服务
+### Step 4: Configure Service
 
-此脚本会：
-- 创建 systemd 服务文件 `~/.config/systemd/user/tradingview.service`
-- 重新加载 systemd 配置
-- 启动 TradingView 服务
+This script will:
+- Create systemd service file at `~/.config/systemd/user/tradingview.service`
+- Reload systemd configuration
+- Start TradingView service
 
-**效果**: TradingView 会作为用户服务运行，可以自动重启。
+**Effect**: TradingView runs as a user service with auto-restart capability.
 
-### 步骤 5: 更新 .bashrc
+### Step 5: Update .bashrc
 
-此脚本会：
-- 备份现有的 .bashrc
-- 添加 fcitx5 环境变量注释
+This script will:
+- Backup existing .bashrc
+- Add fcitx5 environment variable comments
 
-**注意**: 此步骤是可选的，因为 systemd 服务已经包含了所需的环境变量。
+**Note**: This step is optional as systemd service already includes required environment variables.
 
-## 故障排查
+## Troubleshooting
 
-### 步骤 1 失败
+### Step 1 Fails
 
-如果安装失败，检查：
-- 网络连接是否正常
-- 代理是否运行在正确的端口
+If installation fails, check:
+- Network connection is working
+- Proxy is running on correct port
 
-### 步骤 3 失败
+### Step 3 Fails
 
-如果深度链接配置失败，检查：
-- `xdg-settings` 命令是否可用
-- 桌面文件是否正确复制
+If deep link configuration fails, check:
+- `xdg-settings` command is available
+- Desktop file is copied correctly
 
-### 步骤 4 失败
+### Step 4 Fails
 
-如果服务启动失败，检查：
-- niri 是否正在运行
-- 日志：`journalctl --user -u tradingview.service -f`
+If service fails to start, check:
+- niri is running
+- Logs: `journalctl --user -u tradingview.service -f`
 
-## 验证安装
+## Verify Installation
 
-完成所有步骤后，运行验证脚本：
+After completing all steps, run the verification script:
 
 ```bash
 cd ..
 ./scripts/verify-install.sh
 ```
 
-## 下一步
+## Next Steps
 
-安装完成后，你可以：
+After installation, you can:
 
-1. 启动 TradingView: `tradingview`
-2. 查看服务状态: `systemctl --user status tradingview.service`
-3. 设置开机自启: `systemctl --user enable tradingview.service`
+1. Start TradingView: `tradingview`
+2. Check service status: `systemctl --user status tradingview.service`
+3. Enable on login: `systemctl --user enable tradingview.service`

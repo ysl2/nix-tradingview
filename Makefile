@@ -1,58 +1,58 @@
 .PHONY: all install uninstall verify clean help manual
 
-# 默认目标
+# Default target
 all: install
 
-# 帮助信息
+# Help information
 help:
-	@echo "NixOS TradingView 安装脚本 Makefile"
+	@echo "NixOS TradingView Installation Script Makefile"
 	@echo ""
-	@echo "可用命令:"
-	@echo "  make install      - 一键安装 TradingView"
-	@echo "  make uninstall    - 卸载 TradingView"
-	@echo "  make verify       - 验证安装"
-	@echo "  make clean        - 清理临时文件"
-	@echo "  make manual       - 显示手动安装说明"
-	@echo "  make help         - 显示此帮助信息"
+	@echo "Available commands:"
+	@echo "  make install      - Install TradingView (one-click)"
+	@echo "  make uninstall    - Uninstall TradingView"
+	@echo "  make verify       - Verify installation"
+	@echo "  make clean        - Clean temporary files"
+	@echo "  make manual       - Show manual installation guide"
+	@echo "  make help         - Show this help message"
 
-# 一键安装
+# One-click install
 install:
-	@echo "开始安装 TradingView..."
+	@echo "Starting TradingView installation..."
 	@chmod +x setup.sh
 	@./setup.sh
 
-# 卸载
+# Uninstall
 uninstall:
-	@echo "开始卸载 TradingView..."
-	@echo "停止服务..."
+	@echo "Starting TradingView uninstallation..."
+	@echo "Stopping service..."
 	@-systemctl --user stop tradingview.service 2>/dev/null || true
 	@-systemctl --user disable tradingview.service 2>/dev/null || true
-	@echo "从 Nix profile 移除..."
-	@-nix profile remove nixpkgs#tradingview 2>/dev/null || echo "TradingView 未在 profile 中"
-	@echo "删除配置文件..."
+	@echo "Removing from Nix profile..."
+	@-nix profile remove nixpkgs#tradingview 2>/dev/null || echo "TradingView not in profile"
+	@echo "Removing configuration files..."
 	@-rm -f ~/.config/systemd/user/tradingview.service
 	@-rm -f ~/.local/bin/tradingview-wayland
 	@-rm -f ~/.local/share/applications/tradingview.desktop
 	@-rm -f ~/.local/share/icons/tradingview.png
-	@echo "卸载完成"
+	@echo "Uninstallation completed"
 
-# 验证安装
+# Verify installation
 verify:
-	@echo "验证 TradingView 安装..."
+	@echo "Verifying TradingView installation..."
 	@chmod +x scripts/verify-install.sh
 	@./scripts/verify-install.sh
 
-# 清理
+# Clean
 clean:
-	@echo "清理临时文件..."
+	@echo "Cleaning temporary files..."
 	@find . -name "*.bak" -type f -delete
-	@echo "清理完成"
+	@echo "Clean completed"
 
-# 手动安装说明
+# Manual installation guide
 manual:
 	@echo ""
 	@echo "=========================================="
-	@echo "  手动分步安装 TradingView"
+	@echo "  Manual Step-by-Step Installation"
 	@echo "=========================================="
 	@echo ""
 	@cat manual/README.md

@@ -1,33 +1,33 @@
-# 快速开始指南
+# Quick Start Guide
 
-## 一键安装（推荐）
+## One-Click Install (Recommended)
 
 ```bash
 cd ~/Documents/nix-tradingview
 ./setup.sh
 ```
 
-## 使用 Makefile
+## Using Makefile
 
 ```bash
 cd ~/Documents/nix-tradingview
 
-# 安装
+# Install
 make install
 
-# 验证
+# Verify
 make verify
 
-# 卸载
+# Uninstall
 make uninstall
 ```
 
-## 手动安装
+## Manual Installation
 
 ```bash
 cd ~/Documents/nix-tradingview/manual
 
-# 逐步执行每个脚本
+# Execute each script step by step
 ./step1-install.sh
 ./step2-proxy.sh
 ./step3-deep-link.sh
@@ -35,69 +35,69 @@ cd ~/Documents/nix-tradingview/manual
 ./step5-bashrc.sh
 ```
 
-## 验证安装
+## Verify Installation
 
 ```bash
 ./scripts/verify-install.sh
 ```
 
-## 配置要求
+## Configuration Requirements
 
-- **代理端口**: 20171（默认）
-- **Wayland 合成器**: niri
-- **输入法**: fcitx5
+- **Proxy Port**: 20171 (default)
+- **Wayland Compositor**: niri
+- **Input Method**: fcitx5
 
-## 修改代理端口
+## Modifying Proxy Port
 
-如果你的代理不是 20171，需要编辑：
+If your proxy is not on port 20171, edit:
 
-1. `setup.sh` - 修改 `PROXY_PORT` 变量
-2. `manual/step2-proxy.sh` - 修改 `PROXY_PORT` 变量
-3. `config/tradingview.service` - 修改代理地址
-4. `config/tradingview-wayland` - 修改代理环境变量
+1. `setup.sh` - modify `PROXY_PORT` variable
+2. `manual/step2-proxy.sh` - modify `PROXY_PORT` variable
+3. `config/tradingview.service` - modify proxy addresses
+4. `config/tradingview-wayland` - modify proxy environment variables
 
-## 故障排查
+## Troubleshooting
 
-### 服务未启动
+### Service Not Running
 
 ```bash
-# 查看状态
+# Check status
 systemctl --user status tradingview.service
 
-# 查看日志
+# View logs
 journalctl --user -u tradingview.service -f
 ```
 
-### 深度链接不工作
+### Deep Links Not Working
 
 ```bash
-# 检查配置
+# Check configuration
 xdg-settings get default-url-scheme-handler tradingview
 
-# 应该输出: tradingview.desktop
+# Should output: tradingview.desktop
 ```
 
-### 验证环境变量
+### Verify Environment Variables
 
 ```bash
-# 检查运行中的进程
+# Check running process
 cat /proc/$(pgrep tradingview)/environ | tr '\0' '\n' | grep -E "(proxy|fcitx|WAYLAND)"
 ```
 
-## 完成后
+## When Done
 
-安装完成后，你应该能够：
+After installation, you should be able to:
 
-1. ✓ 启动 TradingView
-2. ✓ 使用代理访问网络
-3. ✓ 通过深度链接登录
-4. ✓ 服务自动重启
+1. ✓ Launch TradingView
+2. ✓ Use proxy for network access
+3. ✓ Log in via deep links
+4. ✓ Service auto-restart
 
-## 已知限制
+## Known Limitations
 
-- ⚠️ 输入法支持有限（Electron + Wayland 限制）
-- 💡 建议使用浏览器版本以获得完整的 fcitx5 支持
+- ⚠️ Input method support limited (Electron + Wayland limitation)
+- 💡 Recommend using browser version for full fcitx5 support
 
-## 需要帮助？
+## Need Help?
 
-查看完整文档：`README.md`
+See full documentation: `README.md`

@@ -1,28 +1,28 @@
 #!/usr/bin/env bash
 #
-# TradingView 一键安装脚本
-# 用于 NixOS 系统
+# TradingView One-Click Installation Script
+# For NixOS systems
 #
-# 作者: Claude Code
-# 日期: 2026-02-09
-# 版本: 1.0.0
+# Author: Claude Code
+# Date: 2026-02-09
+# Version: 1.0.0
 #
 
-set -e  # 遇到错误立即退出
+set -e  # Exit on error
 
-# 颜色定义
+# Color definitions
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
-# 配置变量
+# Configuration variables
 PROXY_PORT="20171"
 PROXY_HOST="127.0.0.1"
 TRADINGVIEW_PACKAGE="nixpkgs#tradingview"
 
-# 日志函数
+# Logging functions
 log_info() {
     echo -e "${BLUE}[INFO]${NC} $1"
 }
@@ -39,53 +39,53 @@ log_error() {
     echo -e "${RED}[ERROR]${NC} $1"
 }
 
-# 打印标题
+# Print header
 print_header() {
     echo ""
     echo "=========================================="
-    echo "  TradingView 安装脚本"
-    echo "  NixOS 版本"
+    echo "  TradingView Installation Script"
+    echo "  NixOS Edition"
     echo "=========================================="
     echo ""
 }
 
-# 检查前置条件
+# Check prerequisites
 check_prerequisites() {
-    log_info "检查前置条件..."
+    log_info "Checking prerequisites..."
 
-    # 检查是否在 NixOS 上
+    # Check if running on NixOS
     if [ ! -f /etc/NIXOS ]; then
-        log_error "此脚本只能在 NixOS 上运行"
+        log_error "This script can only run on NixOS"
         exit 1
     fi
 
-    # 检查 nix 命令
+    # Check nix command
     if ! command -v nix &> /dev/null; then
-        log_error "未找到 nix 命令"
+        log_error "nix command not found"
         exit 1
     fi
 
-    log_success "前置条件检查完成"
+    log_success "Prerequisites check completed"
 }
 
-# 步骤 1: 安装 TradingView
+# Step 1: Install TradingView
 install_tradingview() {
-    log_info "步骤 1/5: 安装 TradingView..."
+    log_info "Step 1/5: Installing TradingView..."
 
-    # 设置代理环境变量
+    # Set proxy environment variables
     export http_proxy="http://${PROXY_HOST}:${PROXY_PORT}"
     export https_proxy="http://${PROXY_HOST}:${PROXY_PORT}"
     export NIXPKGS_ALLOW_UNFREE=1
 
-    # 安装 TradingView
+    # Install TradingView
     nix profile install "${TRADINGVIEW_PACKAGE}" --impure
 
-    log_success "TradingView 安装完成"
+    log_success "TradingView installation completed"
 }
 
-# 步骤 2: 创建包装脚本
+# Step 2: Create wrapper script
 create_wrapper_script() {
-    log_info "步骤 2/5: 创建 Wayland 包装脚本..."
+    log_info "Step 2/5: Creating Wayland wrapper script..."
 
     mkdir -p ~/.local/bin
 
@@ -108,12 +108,12 @@ EOF
 
     chmod +x ~/.local/bin/tradingview-wayland
 
-    log_success "包装脚本创建完成: ~/.local/bin/tradingview-wayland"
+    log_success "Wrapper script created: ~/.local/bin/tradingview-wayland"
 }
 
-# 步骤 3: 配置 systemd 服务
+# Step 3: Configure systemd service
 create_systemd_service() {
-    log_info "步骤 3/5: 配置 systemd 服务..."
+    log_info "Step 3/5: Configuring systemd service..."
 
     mkdir -p ~/.config/systemd/user
 
@@ -147,93 +147,93 @@ EOF
 
     systemctl --user daemon-reload
 
-    log_success "systemd 服务配置完成"
+    log_success "systemd service configuration completed"
 }
 
-# 步骤 4: 配置深度链接
+# Step 4: Configure deep links
 configure_deep_link() {
-    log_info "步骤 4/5: 配置深度链接..."
+    log_info "Step 4/5: Configuring deep links..."
 
-    # 复制桌面文件
+    # Copy desktop file
     mkdir -p ~/.local/share/applications
     cp /nix/store/*-tradingview-*/share/applications/tradingview.desktop ~/.local/share/applications/ 2>/dev/null || true
 
-    # 更新桌面文件以使用包装脚本
+    # Update desktop file to use wrapper script
     if [ -f ~/.local/share/applications/tradingview.desktop ]; then
         sed -i 's|^Exec=.*|Exec=/home/songliyu/.local/bin/tradingview-wayland %U|' ~/.local/share/applications/tradingview.desktop
     fi
 
-    # 设置默认协议处理器
+    # Set default protocol handler
     xdg-settings set default-url-scheme-handler tradingview tradingview.desktop
 
-    log_success "深度链接配置完成"
+    log_success "Deep link configuration completed"
 }
 
-# 步骤 5: 更新 .bashrc
+# Step 5: Update .bashrc
 update_bashrc() {
-    log_info "步骤 5/5: 更新 .bashrc..."
+    log_info "Step 5/5: Updating .bashrc..."
 
     BASHRC="$HOME/.bashrc"
 
-    # 检查是否已经添加过
+    # Check if already added
     if grep -q "TradingView fcitx5 fix" "$BASHRC" 2>/dev/null; then
-        log_warning ".bashrc 已经包含 TradingView 配置，跳过"
+        log_warning ".bashrc already contains TradingView configuration, skipping"
         return
     fi
 
-    # 备份 .bashrc
+    # Backup .bashrc
     cp "$BASHRC" "${BASHRC}.bak.$(date +%Y%m%d%H%M%S)"
 
-    # 添加注释标记（供将来参考）
+    # Add comment marker (for future reference)
     cat >> "$BASHRC" << 'EOF'
 
-# TradingView fcitx5 fix - 更新输入法环境变量为 fcitx5
-# 注意：如果已经设置了 fcitx5，可以忽略此部分
+# TradingView fcitx5 fix - Update input method environment variables to fcitx5
+# Note: If fcitx5 is already set, you can ignore this section
 EOF
 
-    log_success ".bashrc 已更新（备份已创建）"
-    log_info "注意：.bashrc 中的 fcitx5 配置已经在步骤 1-4 中通过 systemd 服务设置"
-    log_info "如果需要全局 fcitx5 环境变量，请手动修改 .bashrc 中的输入法配置"
+    log_success ".bashrc updated (backup created)"
+    log_info "Note: fcitx5 configuration in .bashrc is already set by systemd service in steps 1-4"
+    log_info "For global fcitx5 environment variables, manually modify input method configuration in .bashrc"
 }
 
-# 启动服务
+# Start service
 start_service() {
-    log_info "启动 TradingView 服务..."
+    log_info "Starting TradingView service..."
 
     systemctl --user start tradingview.service
 
-    log_success "TradingView 服务已启动"
+    log_success "TradingView service started"
 }
 
-# 打印总结
+# Print summary
 print_summary() {
     echo ""
     echo "=========================================="
-    echo "  安装完成！"
+    echo "  Installation Completed!"
     echo "=========================================="
     echo ""
-    echo "TradingView 已成功安装并启动。"
+    echo "TradingView has been successfully installed and started."
     echo ""
-    echo "服务管理命令："
-    echo "  启动: systemctl --user start tradingview.service"
-    echo "  停止: systemctl --user stop tradingview.service"
-    echo "  重启: systemctl --user restart tradingview.service"
-    echo "  状态: systemctl --user status tradingview.service"
-    echo "  自启: systemctl --user enable tradingview.service"
+    echo "Service Management Commands:"
+    echo "  Start:   systemctl --user start tradingview.service"
+    echo "  Stop:    systemctl --user stop tradingview.service"
+    echo "  Restart: systemctl --user restart tradingview.service"
+    echo "  Status:  systemctl --user status tradingview.service"
+    echo "  Enable:  systemctl --user enable tradingview.service"
     echo ""
-    echo "直接运行:"
+    echo "Run Directly:"
     echo "  tradingview"
     echo ""
-    echo "验证安装:"
+    echo "Verify Installation:"
     echo "  ./scripts/verify-install.sh"
     echo ""
-    echo "已知限制:"
-    echo "  - 输入法支持有限（Electron + Wayland 限制）"
-    echo "  - 建议使用浏览器版本以获得完整的 fcitx5 支持"
+    echo "Known Limitations:"
+    echo "  - Limited input method support (Electron + Wayland limitation)"
+    echo "  - Recommend using browser version for full fcitx5 support"
     echo ""
 }
 
-# 主函数
+# Main function
 main() {
     print_header
 
@@ -248,5 +248,5 @@ main() {
     print_summary
 }
 
-# 运行主函数
+# Run main function
 main

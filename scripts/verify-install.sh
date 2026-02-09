@@ -1,21 +1,21 @@
 #!/usr/bin/env bash
 #
-# 验证 TradingView 安装
-# 检查所有组件是否正确安装
+# Verify TradingView Installation
+# Check all components are correctly installed
 #
 
-# 颜色定义
+# Color definitions
 GREEN='\033[0;32m'
 RED='\033[0;31m'
 YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m'
 
-# 计数器
+# Counters
 PASS=0
 FAIL=0
 
-# 测试函数
+# Test functions
 test_pass() {
     echo -e "${GREEN}✓${NC} $1"
     ((PASS++))
@@ -31,133 +31,133 @@ test_info() {
 }
 
 echo -e "${BLUE}===========================================${NC}"
-echo -e "${BLUE}  TradingView 安装验证${NC}"
+echo -e "${BLUE}  TradingView Installation Verification${NC}"
 echo -e "${BLUE}===========================================${NC}"
 echo ""
 
-# 1. 检查 TradingView 可执行文件
-echo "检查 TradingView 可执行文件..."
+# 1. Check TradingView executable
+echo "Checking TradingView executable..."
 if command -v tradingview &> /dev/null; then
-    test_pass "tradingview 命令可用"
-    echo "  位置: $(which tradingview)"
-    echo "  版本: $(tradingview --version 2>/dev/null || echo 'unknown')"
+    test_pass "tradingview command available"
+    echo "  Location: $(which tradingview)"
+    echo "  Version: $(tradingview --version 2>/dev/null || echo 'unknown')"
 else
-    test_fail "tradingview 命令不可用"
+    test_fail "tradingview command not available"
 fi
 echo ""
 
-# 2. 检查包装脚本
-echo "检查包装脚本..."
+# 2. Check wrapper script
+echo "Checking wrapper script..."
 WRAPPER="$HOME/.local/bin/tradingview-wayland"
 if [ -f "$WRAPPER" ]; then
-    test_pass "包装脚本存在"
+    test_pass "Wrapper script exists"
     if [ -x "$WRAPPER" ]; then
-        test_pass "包装脚本可执行"
+        test_pass "Wrapper script executable"
     else
-        test_fail "包装脚本不可执行"
+        test_fail "Wrapper script not executable"
     fi
 else
-    test_fail "包装脚本不存在"
+    test_fail "Wrapper script does not exist"
 fi
 echo ""
 
-# 3. 检查 systemd 服务
-echo "检查 systemd 服务..."
+# 3. Check systemd service
+echo "Checking systemd service..."
 SERVICE="$HOME/.config/systemd/user/tradingview.service"
 if [ -f "$SERVICE" ]; then
-    test_pass "服务文件存在"
+    test_pass "Service file exists"
 
     if systemctl --user is-active --quiet tradingview.service; then
-        test_pass "服务正在运行"
+        test_pass "Service is running"
     else
-        test_fail "服务未运行"
-        test_info "启动服务: systemctl --user start tradingview.service"
+        test_fail "Service not running"
+        test_info "Start service: systemctl --user start tradingview.service"
     fi
 else
-    test_fail "服务文件不存在"
+    test_fail "Service file does not exist"
 fi
 echo ""
 
-# 4. 检查深度链接配置
-echo "检查深度链接配置..."
+# 4. Check deep link configuration
+echo "Checking deep link configuration..."
 HANDLER=$(xdg-settings get default-url-scheme-handler tradingview 2>/dev/null)
 if [ "$HANDLER" = "tradingview.desktop" ]; then
-    test_pass "深度链接已配置"
+    test_pass "Deep link configured"
 else
-    test_fail "深度链接未配置"
-    test_info "当前: $HANDLER"
+    test_fail "Deep link not configured"
+    test_info "Current: $HANDLER"
 fi
 
 if [ -f "$HOME/.local/share/applications/tradingview.desktop" ]; then
-    test_pass "桌面文件存在"
+    test_pass "Desktop file exists"
 else
-    test_fail "桌面文件不存在"
+    test_fail "Desktop file does not exist"
 fi
 echo ""
 
-# 5. 检查环境变量（从运行中的进程）
-echo "检查进程环境变量..."
+# 5. Check environment variables (from running process)
+echo "Checking process environment variables..."
 PID=$(pgrep -f tradingview | head -1)
 if [ -n "$PID" ]; then
-    test_pass "TradingView 进程运行中 (PID: $PID)"
+    test_pass "TradingView process running (PID: $PID)"
 
-    # 检查代理
+    # Check proxy
     if [ -f "/proc/$PID/environ" ]; then
         PROXY=$(cat "/proc/$PID/environ" | tr '\0' '\n' | grep "^http_proxy=")
         if [ -n "$PROXY" ]; then
-            test_pass "代理已配置: $PROXY"
+            test_pass "Proxy configured: $PROXY"
         else
-            test_fail "代理未配置"
+            test_fail "Proxy not configured"
         fi
 
-        # 检查 Wayland
+        # Check Wayland
         WAYLAND=$(cat "/proc/$PID/environ" | tr '\0' '\n' | grep "^WAYLAND_DISPLAY=")
         if [ -n "$WAYLAND" ]; then
-            test_pass "Wayland 已配置: $WAYLAND"
+            test_pass "Wayland configured: $WAYLAND"
         else
-            test_fail "Wayland 未配置"
+            test_fail "Wayland not configured"
         fi
 
-        # 检查 fcitx5
+        # Check fcitx5
         FCITX=$(cat "/proc/$PID/environ" | tr '\0' '\n' | grep "^GTK_IM_MODULE=fcitx5")
         if [ -n "$FCITX" ]; then
-            test_pass "fcitx5 已配置: $FCITX"
+            test_pass "fcitx5 configured: $FCITX"
         else
-            test_fail "fcitx5 未配置"
+            test_fail "fcitx5 not configured"
         fi
     fi
 else
-    test_fail "TradingView 进程未运行"
+    test_fail "TradingView process not running"
 fi
 echo ""
 
-# 6. 检查 .bashrc
-echo "检查 .bashrc 配置..."
+# 6. Check .bashrc
+echo "Checking .bashrc configuration..."
 if grep -q "TradingView fcitx5 fix" "$HOME/.bashrc" 2>/dev/null; then
-    test_pass ".bashrc 已包含 fcitx5 配置"
+    test_pass ".bashrc contains fcitx5 configuration"
 else
-    test_info ".bashrc 未包含 fcitx5 配置（可选）"
+    test_info ".bashrc does not contain fcitx5 configuration (optional)"
 fi
 echo ""
 
-# 总结
+# Summary
 echo -e "${BLUE}===========================================${NC}"
-echo -e "${BLUE}  验证总结${NC}"
+echo -e "${BLUE}  Verification Summary${NC}"
 echo -e "${BLUE}===========================================${NC}"
 echo ""
-echo -e "${GREEN}通过: $PASS${NC}"
-echo -e "${RED}失败: $FAIL${NC}"
+echo -e "${GREEN}Passed: $PASS${NC}"
+echo -e "${RED}Failed: $FAIL${NC}"
 echo ""
 
 if [ $FAIL -eq 0 ]; then
-    echo -e "${GREEN}所有检查通过！TradingView 已正确安装。${NC}"
+    echo -e "${GREEN}All checks passed! TradingView is correctly installed.${NC}"
     exit 0
 else
-    echo -e "${YELLOW}部分检查失败。请查看上面的详细信息。${NC}"
+    echo -e "${YELLOW}Some checks failed. Please see details above.${NC}"
     echo ""
-    echo "常见问题:"
-    echo "  1. 服务未运行: systemctl --user start tradingview.service"
-    echo "  2. 深度链接未配置: cd manual && ./step3-deep-link.sh"
-    echo "  3. 代理未配置: 检查代理服务是否运行在端口 20171"
+    echo "Common issues:"
+    echo "  1. Service not running: systemctl --user start tradingview.service"
+    echo "  2. Deep link not configured: cd manual && ./step3-deep-link.sh"
+    echo "  3. Proxy not configured: Check if proxy service is running on port 20171"
     exit 1
 fi

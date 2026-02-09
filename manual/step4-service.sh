@@ -1,40 +1,40 @@
 #!/usr/bin/env bash
 #
-# 步骤 4: 配置 systemd 服务
-# 创建并启动 TradingView systemd 用户服务
+# Step 4: Configure systemd Service
+# Create and start TradingView systemd user service
 #
 
 set -e
 
-# 颜色定义
+# Color definitions
 GREEN='\033[0;32m'
 BLUE='\033[0;34m'
 YELLOW='\033[1;33m'
 NC='\033[0m'
 
-# 配置
+# Configuration
 SERVICE_FILE="$HOME/.config/systemd/user/tradingview.service"
 PROXY_PORT="20171"
 PROXY_HOST="127.0.0.1"
 
 echo -e "${BLUE}===========================================${NC}"
-echo -e "${BLUE}  步骤 4/5: 配置 systemd 服务${NC}"
+echo -e "${BLUE}  Step 4/5: Configure systemd Service${NC}"
 echo -e "${BLUE}===========================================${NC}"
 echo ""
 
-# 创建目录
-echo "创建 systemd 目录..."
+# Create directory
+echo "Creating systemd directory..."
 mkdir -p ~/.config/systemd/user
 
-# 检查服务是否已存在
+# Check if service already exists
 if [ -f "$SERVICE_FILE" ]; then
-    echo -e "${YELLOW}服务文件已存在，将覆盖${NC}"
+    echo -e "${YELLOW}Service file already exists, will overwrite${NC}"
     systemctl --user stop tradingview.service 2>/dev/null || true
     cp "$SERVICE_FILE" "${SERVICE_FILE}.bak.$(date +%Y%m%d%H%M%S)"
 fi
 
-# 创建服务文件
-echo "创建 systemd 服务文件..."
+# Create service file
+echo "Creating systemd service file..."
 cat > "$SERVICE_FILE" << EOF
 [Unit]
 Description=TradingView
@@ -63,36 +63,36 @@ Environment=INPUT_METHOD=fcitx5
 WantedBy=default.target
 EOF
 
-# 重新加载 systemd
-echo "重新加载 systemd 配置..."
+# Reload systemd
+echo "Reloading systemd configuration..."
 systemctl --user daemon-reload
 
-# 启动服务
-echo "启动 TradingView 服务..."
+# Start service
+echo "Starting TradingView service..."
 systemctl --user start tradingview.service
 
-# 等待服务启动
+# Wait for service to start
 sleep 2
 
-# 检查服务状态
+# Check service status
 if systemctl --user is-active --quiet tradingview.service; then
     echo ""
-    echo -e "${GREEN}✓ 服务配置完成并已启动！${NC}"
+    echo -e "${GREEN}✓ Service configuration completed and started!${NC}"
     echo ""
-    echo "服务管理命令:"
-    echo "  启动:   systemctl --user start tradingview.service"
-    echo "  停止:   systemctl --user stop tradingview.service"
-    echo "  重启:   systemctl --user restart tradingview.service"
-    echo "  状态:   systemctl --user status tradingview.service"
-    echo "  日志:   journalctl --user -u tradingview.service -f"
-    echo "  开机自启: systemctl --user enable tradingview.service"
+    echo "Service management commands:"
+    echo "  Start:   systemctl --user start tradingview.service"
+    echo "  Stop:    systemctl --user stop tradingview.service"
+    echo "  Restart: systemctl --user restart tradingview.service"
+    echo "  Status:  systemctl --user status tradingview.service"
+    echo "  Logs:    journalctl --user -u tradingview.service -f"
+    echo "  Enable:  systemctl --user enable tradingview.service"
     echo ""
-    echo "当前状态:"
+    echo "Current status:"
     systemctl --user status tradingview.service | head -5
 else
     echo ""
-    echo -e "${YELLOW}警告: 服务未正常运行${NC}"
+    echo -e "${YELLOW}Warning: Service not running properly${NC}"
     echo ""
-    echo "查看日志以诊断问题:"
+    echo "Check logs to diagnose issues:"
     echo "  journalctl --user -u tradingview.service -n 50"
 fi

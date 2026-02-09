@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+# TradingView wrapper for Wayland with fcitx5 support
+export WAYLAND_DISPLAY="${WAYLAND_DISPLAY:-wayland-1}"
+export ELECTRON_OZONE_PLATFORM_HINT=wayland
+export DISPLAY=""
+export http_proxy=http://127.0.0.1:20171
+export https_proxy=http://127.0.0.1:20171
+# fcitx5 input method support
+export GTK_IM_MODULE=fcitx5
+export QT_IM_MODULE=fcitx5
+export XMODIFIERS=@im=fcitx5
+export SDL_IM_MODULE=fcitx5
+export INPUT_METHOD=fcitx5
+exec /home/songliyu/.nix-profile/bin/tradingview "$@"

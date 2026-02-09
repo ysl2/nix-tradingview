@@ -1,0 +1,19 @@
+diff --git a/configuration.nix b/configuration.nix
+index 1234567..abcdefg 100644
+--- a/configuration.nix
++++ b/configuration.nix
+@@ -56,11 +56,11 @@ in {
+   };
+
+   environment.variables = {
+-    GTK_IM_MODULE = "fcitx";
+-    QT_IM_MODULE = "fcitx";
+-    XMODIFIERS = "@im=fcitx";
++    GTK_IM_MODULE = lib.mkForce "fcitx5";
++    QT_IM_MODULE = lib.mkForce "fcitx5";
++    XMODIFIERS = lib.mkForce "@im=fcitx5";
++    SDL_IM_MODULE = lib.mkForce "fcitx5";
++    INPUT_METHOD = lib.mkForce "fcitx5";
+   };
+
+   programs.niri.enable = true;

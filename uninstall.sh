@@ -90,12 +90,28 @@ remove_config_files() {
     log_info "Removing configuration files..."
 
     SERVICE_FILE="$HOME/.config/systemd/user/tradingview.service"
+    DESKTOP_FILE="$HOME/.local/share/applications/tradingview.desktop"
+    LAUNCHER_SCRIPT="$HOME/.local/bin/tradingview-launcher"
 
     if [ -f "$SERVICE_FILE" ]; then
         rm -f "$SERVICE_FILE"
         log_success "Removed: $SERVICE_FILE"
     else
         log_info "Not found: $SERVICE_FILE"
+    fi
+
+    if [ -f "$DESKTOP_FILE" ]; then
+        rm -f "$DESKTOP_FILE"
+        log_success "Removed: $DESKTOP_FILE"
+    else
+        log_info "Not found: $DESKTOP_FILE"
+    fi
+
+    if [ -f "$LAUNCHER_SCRIPT" ]; then
+        rm -f "$LAUNCHER_SCRIPT"
+        log_success "Removed: $LAUNCHER_SCRIPT"
+    else
+        log_info "Not found: $LAUNCHER_SCRIPT"
     fi
 
     # Reload systemd

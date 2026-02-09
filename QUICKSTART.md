@@ -52,7 +52,8 @@ systemctl --user start tradingview.service
 
 - **Proxy Port**: 20171 (default)
 - **Wayland Compositor**: niri
-- **Input Method**: fcitx5
+- **Input Method**: fcitx5 (optional)
+- **gnumake**: Required for Makefile method (install with `nix profile install nixpkgs#gnumake` or add to system packages)
 
 ## Modifying Proxy Port
 
@@ -85,13 +86,13 @@ cat /proc/$(pgrep tradingview)/environ | tr '\0' '\n' | grep -E "(proxy|fcitx|WA
 After installation, you should be able to:
 
 1. ✓ Launch TradingView via systemctl
-2. ✓ Use proxy for network access
-3. ✓ Service auto-restart on failure
+2. ✓ Launch TradingView from desktop launcher (mod+d)
+3. ✓ Use proxy for network access
+4. ✓ Service auto-restart on failure
 
 ## Known Limitations
 
 - ⚠️ Input method support limited (Electron + Wayland limitation)
-- ⚠️ Desktop launcher not supported - use systemctl instead
 - 💡 Recommend using browser version for full fcitx5 support
 
 ## Need Help?

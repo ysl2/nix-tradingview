@@ -70,7 +70,7 @@ check_prerequisites() {
 
 # Step 1: Install TradingView
 install_tradingview() {
-    log_info "Step 1/2: Installing TradingView..."
+    log_info "Step 1/3: Installing TradingView..."
 
     # Set proxy environment variables
     export http_proxy="http://${PROXY_HOST}:${PROXY_PORT}"
@@ -85,7 +85,7 @@ install_tradingview() {
 
 # Step 2: Configure systemd service
 create_systemd_service() {
-    log_info "Step 2/2: Configuring systemd service..."
+    log_info "Step 2/3: Configuring systemd service..."
 
     mkdir -p ~/.config/systemd/user
 
@@ -121,6 +121,57 @@ EOF
     log_success "systemd service configuration completed"
 }
 
+# Step 3: Create desktop file for launcher
+create_desktop_file() {
+    log_info "Step 3/3: Creating desktop file for launcher..."
+
+    mkdir -p ~/.local/share/applications
+    mkdir -p ~/.local/bin
+
+    # Create wrapper script to handle both service start and URL arguments
+    cat > ~/.local/bin/tradingview-launcher << 'WRAPPEOF'
+#!/usr/bin/env bash
+# TradingView launcher - handles both starting service and deep links
+
+SERVICE_NAME="tradingview.service"
+
+# Check if service is running
+if ! systemctl --user is-active --quiet "$SERVICE_NAME"; then
+    systemctl --user start "$SERVICE_NAME"
+    # Wait a bit for the service to start
+    sleep 2
+fi
+
+# If URL argument is provided, open it in the running instance
+if [ -n "$1" ]; then
+    # Extract the tradingview:// URL or any argument
+    /home/songliyu/.nix-profile/bin/tradingview "$@"
+fi
+WRAPPEOF
+
+    chmod +x ~/.local/bin/tradingview-launcher
+
+    # Create desktop file with protocol handler
+    cat > ~/.local/share/applications/tradingview.desktop << EOF
+[Desktop Entry]
+Type=Application
+Name=TradingView
+Comment=TradingView Desktop Application
+Exec=/home/songliyu/.local/bin/tradingview-launcher %u
+Icon=tradingview
+Terminal=false
+Categories=Network;Finance;
+StartupNotify=false
+MimeType=x-scheme-handler/tradingview;
+EOF
+
+    # Register the protocol handler
+    xdg-settings set default-url-scheme-handler tradingview tradingview.desktop 2>/dev/null || true
+    update-desktop-database ~/.local/share/applications 2>/dev/null || true
+
+    log_success "Desktop file created"
+}
+
 # Start service
 start_service() {
     log_info "Starting TradingView service..."
@@ -146,8 +197,7 @@ print_summary() {
     echo "  Status:  systemctl --user status tradingview.service"
     echo "  Enable:  systemctl --user enable tradingview.service"
     echo ""
-    echo "Or run directly:"
-    echo "  tradingview"
+    echo "You can also launch TradingView from your desktop launcher (mod+d)."
     echo ""
     echo "Verify Installation:"
     echo "  ./scripts/verify-install.sh"
@@ -165,6 +215,7 @@ main() {
     check_prerequisites
     install_tradingview
     create_systemd_service
+    create_desktop_file
     start_service
 
     print_summary

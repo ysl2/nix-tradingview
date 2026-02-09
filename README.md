@@ -7,9 +7,9 @@ This project provides a complete set of scripts for installing and configuring T
 - ✅ Install TradingView via Nix (user-level)
 - ✅ Configure HTTP/HTTPS proxy support
 - ✅ Configure systemd service for auto-start
+- ✅ Desktop launcher support (mod+d) via systemd
 - ✅ Fix fcitx5 environment variables
 - ⏸️ XWayland support planned for future (xwayland-satellite)
-- ⚠️ Desktop integration (launcher) not supported - use systemctl instead
 
 ## Project Structure
 
@@ -27,8 +27,6 @@ This project provides a complete set of scripts for installing and configuring T
 └── scripts/               # Utility scripts
     └── verify-install.sh  # Verify installation
 ```
-
-**Note**: Desktop file integration (launcher) is not supported due to Electron + Wayland limitations. Use `systemctl --user start tradingview.service` instead.
 
 ## Quick Start
 
@@ -62,8 +60,9 @@ systemctl --user start tradingview.service
 ## Requirements
 
 - NixOS system
+- `gnumake` (for Makefile method, install with `nix profile install nixpkgs#gnumake` or add to system packages)
 - Proxy running on `127.0.0.1:20171` (modify `PROXY_PORT` variable in scripts if needed)
-- fcitx5 input method framework
+- fcitx5 input method framework (optional, for input method support)
 
 ## Configuration Details
 
@@ -87,19 +86,17 @@ This service includes all necessary environment variables (proxy, Wayland, fcitx
 
 ### Starting TradingView
 
-#### Method 1: Using systemd Service (Recommended)
+#### Using systemd Service (Recommended)
 
 ```bash
 systemctl --user start tradingview.service
 ```
 
-#### Method 2: Direct Command
+#### Using Desktop Launcher (mod+d)
 
-```bash
-tradingview
-```
+A desktop entry is provided for launching TradingView via your launcher (fuzzel, etc.). This will start the systemd service with all environment variables configured.
 
-**Note**: For full environment variables (proxy, Wayland, fcitx5), use the systemd service method above.
+**Note**: Direct command execution (`tradingview`) does not include proxy and other environment variables. Always use systemd service or the desktop launcher.
 
 ### Service Management
 
@@ -173,6 +170,8 @@ nix profile remove nixpkgs#tradingview
 
 # Remove configuration files
 rm -f ~/.config/systemd/user/tradingview.service
+rm -f ~/.local/share/applications/tradingview.desktop
+rm -f ~/.local/bin/tradingview-launcher
 
 # Remove user data (optional)
 rm -rf ~/.config/TradingView
@@ -224,6 +223,23 @@ If you find issues or have suggestions for improvement, feel free to submit an i
 MIT License
 
 ## Changelog
+
+### v1.4.0 (2026-02-09)
+- Added deep link protocol handler (`tradingview://`) for login
+- Created wrapper script (`tradingview-launcher`) to handle both service start and URL arguments
+- Fixed login redirect from web to desktop application
+- Registered `x-scheme-handler/tradingview` with desktop database
+
+### v1.3.0 (2026-02-09)
+- Added desktop launcher support (mod+d) for fuzzel and other launchers
+- Removed direct `tradingview` command from documentation (use systemd only)
+- Updated installation to create desktop file that launches via systemd
+- Updated uninstall script to remove desktop file
+
+### v1.2.0 (2026-02-09)
+- Added `gnumake` as a dependency (for Makefile method)
+- Updated requirements documentation
+- Tested all installation methods successfully
 
 ### v1.1.0 (2026-02-09)
 - Simplified installation process (2 steps instead of 5)
